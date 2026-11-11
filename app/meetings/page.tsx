@@ -1,19 +1,8 @@
 import MeetingCard from '@/components/MeetingCard';
-import { Meeting } from '@/lib/types';
-
-async function getMeetings(): Promise<Meeting[]> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-  const res = await fetch(`${baseUrl}/api/meetings`, { cache: 'no-store' });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch meetings');
-  }
-
-  return res.json();
-}
+import { getMeetings as fetchMeetings } from '@/lib/meetings-db';
 
 export default async function MeetingsPage() {
-  const meetings = await getMeetings();
+  const meetings = fetchMeetings();
 
   if (meetings.length === 0) {
     return (
