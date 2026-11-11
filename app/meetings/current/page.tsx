@@ -1,16 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Meeting } from '@/lib/types';
-
-async function getMeetings(): Promise<Meeting[]> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-  const res = await fetch(`${baseUrl}/api/meetings`, { cache: 'no-store' });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch meetings');
-  }
-
-  return res.json();
-}
+import { getMeetings as fetchAllMeetings } from '@/lib/meetings-db';
 
 function getMostRecentSunday(): string {
   const now = new Date();
@@ -22,7 +11,7 @@ function getMostRecentSunday(): string {
 }
 
 export default async function CurrentMeetingPage() {
-  const meetings = await getMeetings();
+  const meetings = fetchAllMeetings();
 
   if (meetings.length === 0) {
     redirect('/meetings');
