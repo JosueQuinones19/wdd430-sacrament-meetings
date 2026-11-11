@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { getMeetings as fetchAllMeetings } from '@/lib/meetings-db';
-
-export const dynamic = 'force-dynamic';
 
 function getMostRecentSunday(): string {
   const now = new Date();
@@ -13,6 +12,9 @@ function getMostRecentSunday(): string {
 }
 
 export default async function CurrentMeetingPage() {
+  // Opt into dynamic rendering so new Date() works at request time
+  await headers();
+
   const meetings = fetchAllMeetings();
 
   if (meetings.length === 0) {
