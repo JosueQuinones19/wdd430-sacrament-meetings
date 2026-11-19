@@ -1,18 +1,15 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import localFont from 'next/font/local';
+import { Merriweather } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/Header';
 import NavLinks from '@/components/NavLinks';
 import Footer from '@/components/Footer';
 
-const merriweather = localFont({
-  src: [
-    { path: '../public/fonts/merriweather-latin-300-normal.woff2', weight: '300', style: 'normal' },
-    { path: '../public/fonts/merriweather-latin-400-normal.woff2', weight: '400', style: 'normal' },
-    { path: '../public/fonts/merriweather-latin-700-normal.woff2', weight: '700', style: 'normal' },
-    { path: '../public/fonts/merriweather-latin-900-normal.woff2', weight: '900', style: 'normal' },
-  ],
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['300', '400', '700', '900'],
+  display: 'swap',
   variable: '--font-merriweather',
 });
 

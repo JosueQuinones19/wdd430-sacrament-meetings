@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { getMeetings as fetchAllMeetings } from '@/lib/meetings-db';
+import { getMeetingsByDate } from '@/lib/meetings-db';
 
 function getMostRecentSunday(): string {
   const now = new Date();
@@ -12,10 +12,10 @@ function getMostRecentSunday(): string {
 }
 
 export default async function CurrentMeetingPage() {
-  // Opt into dynamic rendering so new Date() works at request time
+  // Opt into dynamic rendering so new Date() runs at request time.
   await headers();
 
-  const meetings = fetchAllMeetings();
+  const meetings = await getMeetingsByDate();
 
   if (meetings.length === 0) {
     redirect('/meetings');
@@ -23,7 +23,8 @@ export default async function CurrentMeetingPage() {
 
   const recentSunday = getMostRecentSunday();
 
-  // Find meeting matching this Sunday or the next upcoming one
+  // meetings is ordered newest first. Prefer this Sunday's meeting, then the
+  // next upcoming one, then fall back to the most recent meeting.
   const currentMeeting =
     meetings.find((m) => m.date === recentSunday) ||
     meetings.find((m) => m.date >= recentSunday) ||

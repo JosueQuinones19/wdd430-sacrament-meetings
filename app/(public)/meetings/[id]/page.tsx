@@ -6,7 +6,7 @@ export default async function MeetingDetailPage(
   props: PageProps<'/meetings/[id]'>
 ) {
   const { id } = await props.params;
-  const meeting = getMeetingById(Number(id));
+  const meeting = await getMeetingById(Number(id));
 
   if (!meeting) {
     notFound();

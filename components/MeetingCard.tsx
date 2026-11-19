@@ -10,6 +10,7 @@ const typeLabels: Record<string, string> = {
   testimony: 'Fast & Testimony Meeting',
   stake: 'Stake Conference',
   general: 'General Conference',
+  special: 'Special Meeting',
 };
 
 const typeBadgeColors: Record<string, string> = {
@@ -17,6 +18,7 @@ const typeBadgeColors: Record<string, string> = {
   testimony: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   stake: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   general: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+  special: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
 };
 
 export default function MeetingCard({ meeting }: MeetingCardProps) {
@@ -51,10 +53,10 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
         </div>
         <span
           className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
-            typeBadgeColors[meeting.type]
+            typeBadgeColors[meeting.type] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
           }`}
         >
-          {typeLabels[meeting.type]}
+          {typeLabels[meeting.type] ?? meeting.type}
         </span>
       </div>
     </Link>

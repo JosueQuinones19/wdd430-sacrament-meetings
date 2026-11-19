@@ -1,147 +1,188 @@
-import { Meeting } from './types';
+import { neon } from '@neondatabase/serverless';
+import {
+  Meeting,
+  MeetingType,
+  HymnInfo,
+  Speaker,
+  MusicalNumber,
+} from './types';
 
-const meetings: Meeting[] = [
-  {
-    id: 1,
-    date: '2026-11-01',
-    type: 'testimony',
-    wardName: 'Maple Creek 3rd Ward',
-    presiding: 'Bishop Robert Jensen',
-    conducting: 'Bishop Robert Jensen',
-    openingHymn: { number: 2, title: 'The Spirit of God' },
-    openingPrayer: 'Sister Maria Lopez',
-    sacramentHymn: { number: 169, title: 'As Now We Take the Sacrament' },
-    closingHymn: { number: 136, title: 'I Know That My Redeemer Lives' },
-    closingPrayer: 'Brother David Park',
-    announcements: [
-      'Ward temple night this Friday at 7:00 PM.',
-      'Youth fundraiser bake sale next Sunday in the cultural hall.',
-    ],
-    wardBusiness: [
-      'Sister Emily Carter sustained as Primary 2nd Counselor.',
-    ],
-    stakeBusiness: false,
-    speakers: [],
-    musicalNumbers: [],
-  },
-  {
-    id: 2,
-    date: '2026-11-08',
-    type: 'regular',
-    wardName: 'Maple Creek 3rd Ward',
-    presiding: 'Bishop Robert Jensen',
-    conducting: 'Brother Michael Torres, 1st Counselor',
-    openingHymn: { number: 26, title: 'Joseph Smith\'s First Prayer' },
-    openingPrayer: 'Brother Alan Fisher',
-    sacramentHymn: { number: 176, title: 'Tis Sweet to Sing the Matchless Love' },
-    closingHymn: { number: 304, title: 'Teach Me to Walk in the Light' },
-    closingPrayer: 'Sister Rachel Adams',
-    announcements: [
-      'Stake conference next week. No regular ward meetings.',
-      'Food drive donations accepted through Wednesday.',
-    ],
-    wardBusiness: [],
-    stakeBusiness: false,
-    speakers: [
-      { name: 'Sister Hannah Brooks', topic: 'Finding Peace Through Prayer' },
-      { name: 'Brother James Whitfield', topic: 'Service in Our Community' },
-    ],
-    musicalNumbers: [
-      { performer: 'Ward Choir', title: 'Come, Thou Fount of Every Blessing' },
-    ],
-  },
-  {
-    id: 3,
-    date: '2026-11-15',
-    type: 'stake',
-    wardName: 'Maple Creek Stake',
-    presiding: 'President Thomas R. Kimball',
-    conducting: 'President Thomas R. Kimball',
-    openingHymn: { number: 19, title: 'We Thank Thee, O God, for a Prophet' },
-    openingPrayer: 'Brother Steven Nguyen',
-    sacramentHymn: { number: 0, title: '' },
-    closingHymn: { number: 255, title: 'Carry On' },
-    closingPrayer: 'Sister Linda Morrison',
-    announcements: [
-      'Stake youth conference registration opens December 1.',
-      'New stake emergency preparedness plan distributed to ward leaders.',
-    ],
-    wardBusiness: [],
-    stakeBusiness: true,
-    speakers: [
-      { name: 'President Thomas R. Kimball', topic: 'Strengthening Our Families' },
-      { name: 'Sister Carol Ann Webb', topic: 'The Covenant Path' },
-      { name: 'Elder Marcus Drew (visiting)', topic: 'Missionary Work in Our Stakes' },
-    ],
-    musicalNumbers: [
-      { performer: 'Stake Youth Choir', title: 'I Am a Child of God' },
-    ],
-  },
-  {
-    id: 4,
-    date: '2026-11-22',
-    type: 'regular',
-    wardName: 'Maple Creek 3rd Ward',
-    presiding: 'Bishop Robert Jensen',
-    conducting: 'Brother Daniel Reyes, 2nd Counselor',
-    openingHymn: { number: 241, title: 'Count Your Blessings' },
-    openingPrayer: 'Sister Naomi Clark',
-    sacramentHymn: { number: 181, title: 'Jesus of Nazareth, Savior and King' },
-    closingHymn: { number: 219, title: 'Because I Have Been Given Much' },
-    closingPrayer: 'Brother Kevin Olsen',
-    announcements: [
-      'Thanksgiving service project: meal assembly at the bishop\'s storehouse, Wednesday at 5 PM.',
-      'No mutual this week due to the holiday.',
-    ],
-    wardBusiness: [
-      'Brother Tyler Grant released as Elders Quorum Secretary with thanks.',
-      'Brother Nathan Price sustained as Elders Quorum Secretary.',
-    ],
-    stakeBusiness: false,
-    speakers: [
-      { name: 'Sister Olivia Chen', topic: 'Gratitude as a Way of Life' },
-      { name: 'Brother Samuel Dixon', topic: 'The Savior\'s Example of Thankfulness' },
-      { name: 'Bishop Robert Jensen', topic: 'Blessings of the Harvest' },
-    ],
-    musicalNumbers: [],
-  },
-  {
-    id: 5,
-    date: '2026-11-29',
-    type: 'regular',
-    wardName: 'Maple Creek 3rd Ward',
-    presiding: 'Bishop Robert Jensen',
-    conducting: 'Bishop Robert Jensen',
-    openingHymn: { number: 85, title: 'How Firm a Foundation' },
-    openingPrayer: 'Brother Richard Endo',
-    sacramentHymn: { number: 174, title: 'While of These Emblems We Partake' },
-    closingHymn: { number: 152, title: 'God Be with You Till We Meet Again' },
-    closingPrayer: 'Sister Priya Sharma',
-    announcements: [
-      'Ward Christmas party December 13 at 6:00 PM. Sign-up sheet in the foyer.',
-      'Tithing settlement appointments available starting next week.',
-    ],
-    wardBusiness: [],
-    stakeBusiness: false,
-    speakers: [
-      { name: 'Brother Isaac Tanaka', topic: 'Preparing for the Savior\'s Birth' },
-      { name: 'Sister Grace Holloway', topic: 'Lights in a Dark World' },
-    ],
-    musicalNumbers: [
-      { performer: 'Sister Megan O\'Brien (violin)', title: 'Silent Night' },
-    ],
-  },
-];
+// Meetings shown per page on the list view.
+export const PAGE_SIZE = 5;
 
-export function getMeetings(date?: string): Meeting[] {
-  if (date) {
-    return meetings.filter((m) => m.date === date);
-  }
-  return [...meetings].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+// Columns selected for every query. `date` is cast to text so it comes back as
+// a plain 'YYYY-MM-DD' string instead of a JS Date (avoids timezone drift).
+const SELECT_COLUMNS = `
+  id,
+  to_char(date, 'YYYY-MM-DD') AS date,
+  meeting_type,
+  ward_name,
+  presiding,
+  conducting,
+  opening_hymn,
+  opening_prayer,
+  sacrament_hymn,
+  closing_hymn,
+  closing_prayer,
+  announcements,
+  ward_business,
+  stake_business,
+  speakers,
+  musical_numbers
+`;
+
+// Row shape as returned by Postgres (snake_case; JSONB already parsed to objects).
+interface MeetingRow {
+  id: number;
+  date: string;
+  meeting_type: MeetingType;
+  ward_name: string;
+  presiding: string;
+  conducting: string;
+  opening_hymn: HymnInfo;
+  opening_prayer: string;
+  sacrament_hymn: HymnInfo;
+  closing_hymn: HymnInfo;
+  closing_prayer: string;
+  announcements: string[] | null;
+  ward_business: string[] | null;
+  stake_business: boolean;
+  speakers: Speaker[] | null;
+  musical_numbers: MusicalNumber[] | null;
 }
 
-export function getMeetingById(id: number): Meeting | undefined {
-  return meetings.find((m) => m.id === id);
+// Create the Neon client lazily so importing this module never throws when
+// DATABASE_URL is missing (e.g. during `next build` or `next lint`). The
+// connection string is only read when an actual query runs at request time.
+function getSql() {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error(
+      'DATABASE_URL is not set. Run `vercel env pull .env.local` for local dev, ' +
+        'or confirm the Neon integration is connected to the Vercel project.'
+    );
+  }
+  return neon(url);
+}
+
+function mapRow(row: MeetingRow): Meeting {
+  return {
+    id: row.id,
+    date: row.date,
+    type: row.meeting_type,
+    wardName: row.ward_name,
+    presiding: row.presiding,
+    conducting: row.conducting,
+    openingHymn: row.opening_hymn,
+    openingPrayer: row.opening_prayer,
+    sacramentHymn: row.sacrament_hymn,
+    closingHymn: row.closing_hymn,
+    closingPrayer: row.closing_prayer,
+    announcements: row.announcements ?? [],
+    wardBusiness: row.ward_business ?? [],
+    stakeBusiness: row.stake_business,
+    speakers: row.speakers ?? [],
+    musicalNumbers: row.musical_numbers ?? [],
+  };
+}
+
+// Case-insensitive search across presiding, conducting, meeting type, and the
+// speakers JSON. Returns one page (PAGE_SIZE) of results, newest first.
+export async function getMeetings(
+  query: string = '',
+  currentPage: number = 1
+): Promise<Meeting[]> {
+  const sql = getSql();
+  const page = Math.max(1, currentPage);
+  const offset = (page - 1) * PAGE_SIZE;
+  const like = `%${query}%`;
+
+  const rows = (await sql.query(
+    `SELECT ${SELECT_COLUMNS}
+     FROM meetings
+     WHERE $1 = ''
+        OR presiding ILIKE $2
+        OR conducting ILIKE $2
+        OR meeting_type::text ILIKE $2
+        OR speakers::text ILIKE $2
+     ORDER BY date DESC
+     LIMIT $3 OFFSET $4`,
+    [query, like, PAGE_SIZE, offset]
+  )) as MeetingRow[];
+
+  return rows.map(mapRow);
+}
+
+// Total number of pages for a given search (at least 1).
+export async function getMeetingsTotalPages(
+  query: string = ''
+): Promise<number> {
+  const sql = getSql();
+  const like = `%${query}%`;
+
+  const rows = (await sql.query(
+    `SELECT COUNT(*)::int AS count
+     FROM meetings
+     WHERE $1 = ''
+        OR presiding ILIKE $2
+        OR conducting ILIKE $2
+        OR meeting_type::text ILIKE $2
+        OR speakers::text ILIKE $2`,
+    [query, like]
+  )) as { count: number }[];
+
+  const count = rows[0]?.count ?? 0;
+  return Math.max(1, Math.ceil(count / PAGE_SIZE));
+}
+
+// Single meeting by id, or null if it does not exist.
+export async function getMeetingById(id: number): Promise<Meeting | null> {
+  const sql = getSql();
+  const rows = (await sql.query(
+    `SELECT ${SELECT_COLUMNS} FROM meetings WHERE id = $1`,
+    [id]
+  )) as MeetingRow[];
+
+  return rows[0] ? mapRow(rows[0]) : null;
+}
+
+// Used by the JSON API. No pagination: returns all meetings, optionally
+// filtered to an exact date, newest first.
+export async function getMeetingsByDate(date?: string): Promise<Meeting[]> {
+  const sql = getSql();
+
+  const rows = date
+    ? ((await sql.query(
+        `SELECT ${SELECT_COLUMNS} FROM meetings
+         WHERE to_char(date, 'YYYY-MM-DD') = $1
+         ORDER BY date DESC`,
+        [date]
+      )) as MeetingRow[])
+    : ((await sql.query(
+        `SELECT ${SELECT_COLUMNS} FROM meetings ORDER BY date DESC`,
+        []
+      )) as MeetingRow[]);
+
+  return rows.map(mapRow);
+}
+
+// Write operations arrive in Week 04. Kept as stubs so the admin routes and
+// future forms have a stable interface to call.
+export async function addMeeting(meeting: Omit<Meeting, 'id'>): Promise<Meeting> {
+  void meeting;
+  throw new Error('addMeeting is not implemented yet. Coming in Week 04.');
+}
+
+export async function updateMeeting(
+  id: number,
+  meeting: Partial<Meeting>
+): Promise<Meeting> {
+  void id;
+  void meeting;
+  throw new Error('updateMeeting is not implemented yet. Coming in Week 04.');
+}
+
+export async function deleteMeeting(id: number): Promise<void> {
+  void id;
+  throw new Error('deleteMeeting is not implemented yet. Coming in Week 04.');
 }

@@ -11,6 +11,7 @@ const typeLabels: Record<string, string> = {
   testimony: 'Fast & Testimony Meeting',
   stake: 'Stake Conference',
   general: 'General Conference',
+  special: 'Special Meeting',
 };
 
 export default function MeetingDetail({ meeting }: MeetingDetailProps) {

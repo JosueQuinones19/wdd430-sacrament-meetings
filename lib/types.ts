@@ -1,4 +1,9 @@
-export type MeetingType = 'regular' | 'testimony' | 'stake' | 'general';
+export type MeetingType =
+  | 'regular'
+  | 'testimony'
+  | 'stake'
+  | 'general'
+  | 'special';
 
 export interface HymnInfo {
   number: number;
